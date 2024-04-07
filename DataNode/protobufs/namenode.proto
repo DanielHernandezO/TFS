@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+message Socket{
+    string ip=1;
+    string port=2;
+}
+
+message ChunkLocation{
+    string name=1;
+    int32  chunkId=2;
+    int32 replicaId=3;
+    Socket socket=4;
+}
+
+message Sockets{
+    repeated Socket sockets=1;
+}
+
+message Chunk{
+    int64 chunkId=1;
+    repeated Socket sockets=2;
+}
+
+message FileMetadata{
+    string fileId=1;
+    repeated Chunk chunks=2;
+}
+
+message Metadata{
+    repeated FileMetadata files=1;
+}
+
+message VoidRequest{}
+
+message Response{
+    int32 code =1;
+    string message=2;
+}
+
+service LocateChunk{
+    rpc LocateChunk(ChunkLocation) returns (Response);
+}
+
+service HeartBeat{
+    rpc HeartBeat(Socket) returns (Response);
+}
+
+service Fetch{
+    rpc FetchSocket(VoidRequest) returns (Sockets);
+    rpc FetchLocations(VoidRequest) returns (Metadata);
+}

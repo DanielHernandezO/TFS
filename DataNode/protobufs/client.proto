@@ -1,0 +1,31 @@
+syntax="proto3";
+import "namenode.proto";
+
+message ChunkWriteRequest{
+    ChunkLocation chunkMetadata = 1;
+    repeated Socket pipelineDataNodes = 2;
+    bytes chunkBytes = 3;
+}
+
+message ChunkReadRequest{
+    ChunkLocation chunkMetadata = 1;
+}
+
+message ChunkWriteResponse{
+    int32 code =1;
+    string message=2;
+    ChunkLocation chunkMetadata =3;
+}
+
+message ChunkReadResponse{
+    int32 code = 1;
+    string message = 2;
+    ChunkLocation chunkMetadata = 3;
+    bytes chunkBytes = 4;
+}
+
+
+service DataNodeService{
+    rpc Write(ChunkWriteRequest) returns (ChunkWriteResponse);
+    rpc Read(ChunkReadResponse) returns (ChunkReadResponse);
+}

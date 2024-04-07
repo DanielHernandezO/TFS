@@ -23,8 +23,9 @@ func NewLocateHandler(locateUsecase usecase.LocateUsecase) *locateHandler {
 
 func (l *locateHandler) LocateChunk(context context.Context, chunkLocation *config.ChunkLocation) (*config.Response, error) {
 	location := &domain.ChunkLocation{
-		Name: chunkLocation.Name,
-		ID:   int(chunkLocation.ChunkId),
+		Name:      chunkLocation.Name,
+		ID:        int(chunkLocation.ChunkId),
+		ReplicaId: int(chunkLocation.ReplicaId),
 		Socket: domain.Socket{
 			Ip:   chunkLocation.Socket.Ip,
 			Port: chunkLocation.Socket.Port,
@@ -34,7 +35,7 @@ func (l *locateHandler) LocateChunk(context context.Context, chunkLocation *conf
 	err := l.locateUsecase.LocateChunk(&context, location)
 
 	if err != nil {
-		return &config.Response{}, err
+		return nil, err
 	}
 	return &config.Response{
 		Code:    http.StatusOK,

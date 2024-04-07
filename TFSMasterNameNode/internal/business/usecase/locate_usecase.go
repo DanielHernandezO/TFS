@@ -13,11 +13,13 @@ type LocateUsecase interface {
 
 type locateUsecase struct {
 	metadataGateway gateway.MetadataGateway
+	fetchGatewat    gateway.FetchGateway
 }
 
-func NewLocateUsecase(metadataGateway gateway.MetadataGateway) *locateUsecase {
+func NewLocateUsecase(metadataGateway gateway.MetadataGateway, fetchGatewat gateway.FetchGateway) *locateUsecase {
 	return &locateUsecase{
 		metadataGateway: metadataGateway,
+		fetchGatewat:    fetchGatewat,
 	}
 }
 
@@ -26,5 +28,10 @@ func (l *locateUsecase) LocateChunk(context *context.Context, location *domain.C
 	if err != nil {
 		return err
 	}
+	_, err = l.fetchGatewat.FetchLocation(context, location)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -11,17 +11,23 @@ import (
 type FetchUsecase interface {
 	FetchSocket(context context.Context) *config.Sockets
 	FetchLocations(context context.Context) *config.Metadata
+	FetchMetadata(context context.Context, metadata *domain.Metadata) error
+	DeleteMetadataFetch(fileName string) error
+	GetMetadata(context *context.Context)
+	GetSockets(context *context.Context)
 }
 
 type fetchUsecase struct {
 	socketGateway   gateway.SocketGateway
 	metadataGateway gateway.MetadataGateway
+	fetchGateway    gateway.FetchGateway
 }
 
-func NewFetchUsecase(socketGateway gateway.SocketGateway, metadataGateway gateway.MetadataGateway) *fetchUsecase {
+func NewFetchUsecase(socketGateway gateway.SocketGateway, metadataGateway gateway.MetadataGateway, fetchGateway gateway.FetchGateway) *fetchUsecase {
 	return &fetchUsecase{
 		socketGateway:   socketGateway,
 		metadataGateway: metadataGateway,
+		fetchGateway:    fetchGateway,
 	}
 }
 
@@ -52,6 +58,56 @@ func (f *fetchUsecase) FetchLocations(context context.Context) *config.Metadata 
 	}
 }
 
+func (f *fetchUsecase) FetchMetadata(context context.Context, metadata *domain.Metadata) error {
+	err := f.metadataGateway.Add(metadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *fetchUsecase) DeleteMetadataFetch(fileName string) error {
+	err := f.metadataGateway.Delete(fileName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *fetchUsecase) GetMetadata(context *context.Context) {
+	metadata := f.fetchGateway.GetMetadata(context)
+	for _, data := range metadata.Files {
+		f.metadataGateway.Add(&domain.Metadata{
+			Name:           data.FileId,
+			ChunksQuantity: len(data.Chunks),
+		})
+		for _, chunk := range data.Chunks {
+			for _, socket := range chunk.Sockets {
+				f.metadataGateway.LocateChunk(&domain.ChunkLocation{
+					Name:      data.FileId,
+					ID:        int(chunk.ChunkId),
+					ReplicaId: int(socket.ReplicaId),
+					Socket: domain.Socket{
+						Ip:        socket.Ip,
+						Port:      socket.Port,
+						ReplicaId: int(socket.ReplicaId),
+					},
+				})
+			}
+		}
+	}
+}
+
+func (f *fetchUsecase) GetSockets(context *context.Context) {
+	sockets := f.fetchGateway.GetSockets(context)
+	for _, socket := range sockets.Sockets {
+		f.socketGateway.Add(&domain.Socket{
+			Ip:   socket.Ip,
+			Port: socket.Port,
+		})
+	}
+}
+
 func (f *fetchUsecase) buildFileChunks(socketsData []domain.Chunk) []*config.Chunk {
 	chunks := []*config.Chunk{}
 	for _, value := range socketsData {
@@ -67,8 +123,9 @@ func (f *fetchUsecase) buildSockets(socketsData []domain.Socket) []*config.Socke
 	chunks := []*config.Socket{}
 	for _, value := range socketsData {
 		chunks = append(chunks, &config.Socket{
-			Ip:   value.Ip,
-			Port: value.Port,
+			Ip:        value.Ip,
+			Port:      value.Port,
+			ReplicaId: int32(value.ReplicaId),
 		})
 	}
 	return chunks

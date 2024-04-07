@@ -27,8 +27,11 @@ func (h *heartBeatHandler) HeartBeat(context context.Context, socketData *config
 		Port: socketData.Port,
 	}
 
-	h.heartBeatUsecase.HeartBeat(&context, socket)
+	err := h.heartBeatUsecase.HeartBeat(&context, socket)
 
+	if err != nil {
+		return nil, err
+	}
 	return &config.Response{
 		Code:    http.StatusOK,
 		Message: constant.AddedServer,

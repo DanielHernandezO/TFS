@@ -5,12 +5,14 @@ option go_package = "github.com/TSF/TFSMasterNameNode/internal/infrastructure/co
 message Socket{
     string ip=1;
     string port=2;
+    int32 replicaId=3;
 }
 
 message ChunkLocation{
     string name=1;
     int32  chunkId=2;
-    Socket socket=3;
+    int32  replicaId=3;
+    Socket socket=4;
 }
 
 message Sockets{

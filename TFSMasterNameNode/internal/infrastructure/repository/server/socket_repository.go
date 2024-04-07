@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	minutesHeartBeatLimit = 1
+	minutesHeartBeatLimit = 5
 )
 
 type socketRepository struct {
@@ -44,7 +44,7 @@ func (s *socketRepository) Update() {
 	for key, value := range s.sockets {
 		difference := time.Since(*value.Date)
 		minutes := int(difference.Minutes())
-		if minutes < minutesHeartBeatLimit {
+		if minutes > minutesHeartBeatLimit {
 			delete(s.sockets, key)
 		}
 	}

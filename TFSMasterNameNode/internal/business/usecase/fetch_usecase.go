@@ -67,8 +67,9 @@ func (f *fetchUsecase) buildSockets(socketsData []domain.Socket) []*config.Socke
 	chunks := []*config.Socket{}
 	for _, value := range socketsData {
 		chunks = append(chunks, &config.Socket{
-			Ip:   value.Ip,
-			Port: value.Port,
+			Ip:        value.Ip,
+			Port:      value.Port,
+			ReplicaId: int32(value.ReplicaId),
 		})
 	}
 	return chunks

@@ -39,8 +39,9 @@ func (s *socketUsecase) GetReplicas() *[]domain.Socket {
 	})
 
 	selectedSockets := []domain.Socket{}
-	for i := 0; i < replicas && i < len(socketList); i++ {
-		index := rand.Intn(len(socketList) - i)
+	listSize := len(socketList)
+	for i := 0; i < replicas && i < listSize; i++ {
+		index := rand.Intn(listSize - i)
 		selectedSockets = append(selectedSockets, socketList[index])
 
 		socketList = append(socketList[:index], socketList[index+1:]...)

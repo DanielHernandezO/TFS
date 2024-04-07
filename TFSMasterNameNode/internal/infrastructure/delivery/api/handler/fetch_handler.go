@@ -27,3 +27,7 @@ func (f *fetchHandler) FetchLocations(context context.Context, request *config.V
 	locations := f.fetchUsecase.FetchLocations(context)
 	return locations, nil
 }
+
+func (f *fetchHandler) ExecuteFetchLocations() {
+
+}

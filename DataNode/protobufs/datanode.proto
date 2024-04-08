@@ -1,0 +1,41 @@
+syntax="proto3";
+
+message ChunkMetadata{
+    string name=1;
+    int32  chunkId=2;
+    int32 replicaId=3;
+}
+
+message DataNodeSocket{
+    string ip=1;
+    string port=2;
+}
+
+message ChunkWriteRequest{
+    ChunkMetadata chunkMetadata = 1;
+    repeated DataNodeSocket pipelineDataNodes = 2;
+    bytes chunkBytes = 3;
+}
+
+message ChunkReadRequest{
+    ChunkMetadata chunkMetadata = 1;
+}
+
+message ChunkWriteResponse{
+    int32 code =1;
+    string message=2;
+    ChunkMetadata chunkMetadata =3;
+}
+
+message ChunkReadResponse{
+    int32 code = 1;
+    string message = 2;
+    ChunkMetadata chunkMetadata = 3;
+    bytes chunkBytes = 4;
+}
+
+
+service DataNodeService{
+    rpc WriteChunk(ChunkWriteRequest) returns (ChunkWriteResponse);
+    rpc ReadChunk(ChunkReadRequest) returns (ChunkReadResponse);
+}

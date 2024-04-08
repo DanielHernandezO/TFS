@@ -1,8 +1,11 @@
+from concurrent import futures
 import os
 from dotenv import load_dotenv
 import grpc
 from namenode_client import NameNodeClient
 import threading
+import datanode_pb2_grpc
+from datanode_servicer import DataNodeServicer
 def initialize():
     if os.path.exists(".env"):
         load_dotenv()
@@ -24,6 +27,22 @@ def initialize():
 
     
     namenode_client.start_heartbeat()
+
+
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),options=[
+    ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50 MB
+    ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50 MB
+])
+
+    datanode_pb2_grpc.add_DataNodeServiceServicer_to_server(DataNodeServicer(MASTER_NAMENODE_URI,DATANODE_URI),server)
+
+    server.add_insecure_port(DATANODE_URI)
+
+    server.start()
+
+    print(f"DataNode grpc started server at  {DATANODE_URI}")
+
+    server.wait_for_termination()
 
     
 

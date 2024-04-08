@@ -14,14 +14,16 @@ class Socket(_message.Message):
     def __init__(self, ip: _Optional[str] = ..., port: _Optional[str] = ...) -> None: ...
 
 class ChunkLocation(_message.Message):
-    __slots__ = ("name", "chunkId", "socket")
+    __slots__ = ("name", "chunkId", "replicaId", "socket")
     NAME_FIELD_NUMBER: _ClassVar[int]
     CHUNKID_FIELD_NUMBER: _ClassVar[int]
+    REPLICAID_FIELD_NUMBER: _ClassVar[int]
     SOCKET_FIELD_NUMBER: _ClassVar[int]
     name: str
     chunkId: int
+    replicaId: int
     socket: Socket
-    def __init__(self, name: _Optional[str] = ..., chunkId: _Optional[int] = ..., socket: _Optional[_Union[Socket, _Mapping]] = ...) -> None: ...
+    def __init__(self, name: _Optional[str] = ..., chunkId: _Optional[int] = ..., replicaId: _Optional[int] = ..., socket: _Optional[_Union[Socket, _Mapping]] = ...) -> None: ...
 
 class Sockets(_message.Message):
     __slots__ = ("sockets",)

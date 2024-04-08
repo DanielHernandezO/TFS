@@ -27,7 +27,7 @@ func NewMetadataHanlder(metadataUsecase usecase.Metadatausecase) *metadataHandle
 
 func (m *metadataHandler) Add(c *gin.Context) {
 	var metadata domain.Metadata
-
+	context := c.Request.Context()
 	if err := c.BindJSON(&metadata); err != nil {
 		c.JSON(http.StatusBadRequest, domain.Response{
 			Code:    http.StatusBadRequest,
@@ -35,7 +35,7 @@ func (m *metadataHandler) Add(c *gin.Context) {
 		})
 		return
 	}
-	err := m.metadataUsecase.Add(&metadata)
+	err := m.metadataUsecase.Add(context, &metadata)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, domain.Response{
@@ -52,8 +52,8 @@ func (m *metadataHandler) Add(c *gin.Context) {
 
 func (m *metadataHandler) Delete(c *gin.Context) {
 	fileName := c.Param(constant.FileName)
-
-	err := m.metadataUsecase.Delete(fileName)
+	context := c.Request.Context()
+	err := m.metadataUsecase.Delete(context, fileName)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, domain.Response{

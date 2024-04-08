@@ -10,8 +10,10 @@ import (
 var properties map[string]string
 
 var (
+	Fetch      = "fetch"
 	Network    = "network"
 	PortConfig = "port_%s"
+	IpConfig   = "ip_%s"
 )
 
 func LoadConfigs() {

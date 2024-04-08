@@ -35,7 +35,7 @@ func (l *locateHandler) LocateChunk(context context.Context, chunkLocation *conf
 	err := l.locateUsecase.LocateChunk(&context, location)
 
 	if err != nil {
-		return &config.Response{}, err
+		return nil, err
 	}
 	return &config.Response{
 		Code:    http.StatusOK,

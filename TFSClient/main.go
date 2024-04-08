@@ -29,16 +29,28 @@ func main() {
 
 		palabras := strings.Split(line, " ")
 
-		if palabras[0] == "Particionar" {
+		if palabras[0] == "Write" {
 			chunkNumber, err := strconv.Atoi(palabras[2])
-
 			file, err := os.Open(palabras[1])
-			Business.PartitionFile(file, chunkNumber)
+			resp, err := Business.ParticionFile(file, chunkNumber)
+			if resp != nil {
+				Business.WriteBlocks(resp)
+			}
 			fmt.Println(err)
-		} else if palabras[0] == "Buscar" {
+		} else if palabras[0] == "Read" {
 			palabras := strings.Split(line, " ")
 			fmt.Println(palabras[1])
 			Business.RestoreFile(palabras[1])
+		} else if palabras[0] == "List" {
+
+			respuesta, err := Business.GetReplicas()
+			if err != nil {
+				fmt.Println(err)
+			}
+			for _, chunk := range respuesta.Chunks {
+				fmt.Println(chunk.ChunkId)
+				fmt.Println(chunk.Sockets)
+			}
 		} else if palabras[0] == "Conectar" {
 			var request Commons.NameNodeRequest
 			request.ChunksQuantity = 2

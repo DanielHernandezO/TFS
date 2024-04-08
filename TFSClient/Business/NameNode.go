@@ -27,6 +27,8 @@ func WritteAlert(request Commons.NameNodeRequest) (http.Response, error) {
 		}
 	}
 	if res == nil {
+		http.ListenAndServe(Constant.PortSec, nil)
+
 		res, err := http.Post(Constant.Ip_sec+"/namenode/add/metadata", "application/json", request)
 		if err != nil {
 			fmt.Println(err)
@@ -37,6 +39,7 @@ func WritteAlert(request Commons.NameNodeRequest) (http.Response, error) {
 }
 
 func GetReplicas() (Commons.DataNodesList, error) {
+	http.ListenAndServe(Constant.PortPrin, nil)
 
 	var response Commons.DataNodesList
 
@@ -57,6 +60,8 @@ func GetReplicas() (Commons.DataNodesList, error) {
 		}
 	}
 	if res == nil {
+		http.ListenAndServe(Constant.Ip_sec, nil)
+
 		res, err := http.Get(Constant.Ip_sec + "/namenode/get/replicas")
 		if err != nil {
 			fmt.Println(err)
@@ -76,6 +81,8 @@ func GetReplicas() (Commons.DataNodesList, error) {
 }
 
 func GetMetadata(fileName string) (Commons.NameNodeResponse, error) {
+	http.ListenAndServe(Constant.PortPrin, nil)
+
 	var response Commons.NameNodeResponse
 
 	res, err := http.Get(Constant.Ip_prin + "/namenode/get/metadata/" + fileName)
@@ -93,6 +100,8 @@ func GetMetadata(fileName string) (Commons.NameNodeResponse, error) {
 		}
 	}
 	if res == nil {
+		http.ListenAndServe(Constant.Ip_sec, nil)
+
 		res, err := http.Get(Constant.Ip_sec + "/namenode/get/metadata/" + fileName)
 		if err != nil {
 			fmt.Println(err)

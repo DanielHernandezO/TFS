@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"time"
 
+	"github.com/TSF/TFSMasterNameNode/internal/business/constant"
 	"github.com/TSF/TFSMasterNameNode/internal/infrastructure/config"
 	"github.com/TSF/TFSMasterNameNode/internal/infrastructure/delivery"
 	"github.com/gin-gonic/gin"
@@ -47,6 +49,15 @@ func (r *api) Start() {
 			}
 		}()
 	}()
+
+	needFetch, err := strconv.ParseBool(config.GetStringPropetyBykey(config.Fetch))
+	if err != nil {
+		panic(constant.FecthNotBool)
+	}
+	if needFetch {
+		dependencies.executeFetchHandler.ExecuteFetchLocations()
+		dependencies.executeFetchHandler.ExecuteFetchSockets()
+	}
 
 	router := gin.Default()
 	mapUrls(router, dependencies)

@@ -33,11 +33,20 @@ message Metadata{
     repeated FileMetadata files=1;
 }
 
+message FileMetadataFetch{
+    string fileId = 1;
+    int32  chunksQuantity =2;
+}
+
 message VoidRequest{}
 
 message Response{
     int32 code =1;
     string message=2;
+}
+
+message DeleteMetadata{
+    string fileId = 1;
 }
 
 service LocateChunk{
@@ -51,4 +60,6 @@ service HeartBeat{
 service Fetch{
     rpc FetchSocket(VoidRequest) returns (Sockets);
     rpc FetchLocations(VoidRequest) returns (Metadata);
+    rpc FetchMetadata(FileMetadataFetch) returns (Response);
+    rpc DeleteMetadataFetch(DeleteMetadata) returns (Response);
 }

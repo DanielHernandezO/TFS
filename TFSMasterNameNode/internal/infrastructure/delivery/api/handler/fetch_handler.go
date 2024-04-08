@@ -2,7 +2,10 @@ package handler
 
 import (
 	"context"
+	"net/http"
 
+	"github.com/TSF/TFSMasterNameNode/internal/business/constant"
+	"github.com/TSF/TFSMasterNameNode/internal/business/domain"
 	"github.com/TSF/TFSMasterNameNode/internal/business/usecase"
 	"github.com/TSF/TFSMasterNameNode/internal/infrastructure/config"
 )
@@ -28,6 +31,27 @@ func (f *fetchHandler) FetchLocations(context context.Context, request *config.V
 	return locations, nil
 }
 
-func (f *fetchHandler) ExecuteFetchLocations() {
+func (f *fetchHandler) FetchMetadata(context context.Context, metadata *config.FileMetadataFetch) (*config.Response, error) {
+	err := f.fetchUsecase.FetchMetadata(context, &domain.Metadata{
+		Name:           metadata.FileId,
+		ChunksQuantity: int(metadata.ChunksQuantity),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &config.Response{
+		Code:    http.StatusOK,
+		Message: constant.SavedMetadata,
+	}, nil
+}
 
+func (f *fetchHandler) DeleteMetadataFetch(context context.Context, metadata *config.DeleteMetadata) (*config.Response, error) {
+	err := f.fetchUsecase.DeleteMetadataFetch(metadata.FileId)
+	if err != nil {
+		return nil, err
+	}
+	return &config.Response{
+		Code:    http.StatusOK,
+		Message: constant.SavedMetadata,
+	}, nil
 }

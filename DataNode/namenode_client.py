@@ -11,7 +11,7 @@ class NameNodeClient:
         self.channel : grpc.Channel = grpc.insecure_channel(self.namenode_uri)
         self.datanode_uri = datanode_uri
         self.heartbeat_stub : namenode_pb2_grpc.HeartBeatStub = namenode_pb2_grpc.HeartBeatStub(self.channel);
-        uri_parse : ParseResult = urlparse(self.datanode_uri)
+        uri_parse : ParseResult = urlparse("http://"+self.datanode_uri)
         self.socket = namenode_pb2.Socket(ip=uri_parse.hostname,port=str(uri_parse.port))
         
     def send_heartbeat(self):

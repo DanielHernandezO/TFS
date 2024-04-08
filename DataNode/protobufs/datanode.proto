@@ -6,14 +6,14 @@ message ChunkMetadata{
     int32 replicaId=3;
 }
 
-message Socket{
+message DataNodeSocket{
     string ip=1;
     string port=2;
 }
 
 message ChunkWriteRequest{
     ChunkMetadata chunkMetadata = 1;
-    repeated Socket pipelineDataNodes = 2;
+    repeated DataNodeSocket pipelineDataNodes = 2;
     bytes chunkBytes = 3;
 }
 
@@ -37,5 +37,5 @@ message ChunkReadResponse{
 
 service DataNodeService{
     rpc WriteChunk(ChunkWriteRequest) returns (ChunkWriteResponse);
-    rpc ReadChunk(ChunkReadResponse) returns (ChunkReadResponse);
+    rpc ReadChunk(ChunkReadRequest) returns (ChunkReadResponse);
 }

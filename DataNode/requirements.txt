@@ -1,3 +1,2 @@
-grpc
-grpc-tools
-urllib3
+grpcio-tools
+python-dotenv

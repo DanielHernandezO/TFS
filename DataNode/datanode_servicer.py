@@ -5,13 +5,19 @@ import datanode_pb2,datanode_pb2_grpc
 import namenode_pb2_grpc,namenode_pb2
 class DataNodeServicer(datanode_pb2_grpc.DataNodeServiceServicer):
 
-    def __init__(self,namenode_uri:str,datanode_uri:str) -> None:
+    def __init__(self,namenode_uri:str,datanode_uri:str,namenode_slave_uri:str) -> None:
         super().__init__()
+
+        
         self.datanode_uri : ParseResult = urlparse("http://"+datanode_uri)
+        self.datanode_slave_uri = namenode_slave_uri
         print(self.datanode_uri,self.datanode_uri.hostname,self.datanode_uri.port)
         self.namenode_uri : ParseResult = urlparse("http://"+namenode_uri)
         namenode_channel = grpc.insecure_channel(namenode_uri)
+        slave_channel = grpc.insecure_channel(namenode_slave_uri)
+
         self.namenode_stub = namenode_pb2_grpc.LocateChunkStub(namenode_channel)
+        self.namenode_slave_stub = namenode_pb2_grpc.LocateChunkStub(slave_channel)
 
     def WriteChunk(self, request:datanode_pb2.ChunkWriteRequest, context):
 
@@ -25,6 +31,8 @@ class DataNodeServicer(datanode_pb2_grpc.DataNodeServiceServicer):
             file.write(request.chunkBytes)
 
 
+
+
         response = datanode_pb2.ChunkWriteResponse(
             code=200,
             message="Chunk successfully written",
@@ -35,7 +43,20 @@ class DataNodeServicer(datanode_pb2_grpc.DataNodeServiceServicer):
         
         print(locate_chunk_request)
 
-        self.namenode_stub.LocateChunk(locate_chunk_request)
+        try:
+            self.namenode_stub.LocateChunk(locate_chunk_request)
+        except grpc.RpcError as e:
+            try:
+                error_status = e.code()
+                if(error_status == grpc.StatusCode.DEADLINE_EXCEEDED or error_status == grpc.StatusCode.UNAVAILABLE):
+                    print(f"MASTER WRITE REQUEST FAILED, SWITCHING TO SLAVE AT: {self.datanode_slave_uri}")
+                    self.namenode_slave_stub.LocateChunk(locate_chunk_request)
+                else:
+                    raise e
+            except grpc.RpcError as slave_e:
+                if(error_status == grpc.StatusCode.DEADLINE_EXCEEDED or error_status == grpc.StatusCode.UNAVAILABLE):
+                    print("BOTH MASTER AND SLAVE FAILED")
+                raise slave_e
 
         if request.pipelineDataNodes != []:
 

@@ -13,8 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the protobuf files into the container
 COPY protobufs/ protobufs/
 
-ENV PYTHONUNBUFFERED 0
-ENV MASTER_NAMENODE_URI 127.0.0.1:5000
+ENV PYTHONUNBUFFERED 1
+ENV MASTER_NAMENODE_URI 54.159.111.11:8081
+ENV SLAVE_NAMENODE_URI  54.87.187.108:8081
 
 RUN mkdir chunks/
 

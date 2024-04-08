@@ -13,6 +13,8 @@ type FetchUsecase interface {
 	FetchLocations(context context.Context) *config.Metadata
 	FetchMetadata(context context.Context, metadata *domain.Metadata) error
 	DeleteMetadataFetch(fileName string) error
+	FetchLocateChunk(context *context.Context, location *domain.ChunkLocation) error
+	FetchHeartBeat(context *context.Context, socket *domain.Socket) error
 	GetMetadata(context *context.Context)
 	GetSockets(context *context.Context)
 }
@@ -71,6 +73,19 @@ func (f *fetchUsecase) DeleteMetadataFetch(fileName string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (f *fetchUsecase) FetchLocateChunk(context *context.Context, location *domain.ChunkLocation) error {
+	err := f.metadataGateway.LocateChunk(location)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *fetchUsecase) FetchHeartBeat(context *context.Context, socket *domain.Socket) error {
+	f.socketGateway.Add(socket)
 	return nil
 }
 

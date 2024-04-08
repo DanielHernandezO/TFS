@@ -62,4 +62,6 @@ service Fetch{
     rpc FetchLocations(VoidRequest) returns (Metadata);
     rpc FetchMetadata(FileMetadataFetch) returns (Response);
     rpc DeleteMetadataFetch(DeleteMetadata) returns (Response);
+    rpc FetchLocateChunk(ChunkLocation) returns (Response);
+    rpc FetchHeartBeat(Socket) returns (Response);
 }

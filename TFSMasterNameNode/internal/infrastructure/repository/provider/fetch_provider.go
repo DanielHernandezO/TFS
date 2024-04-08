@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/TSF/TFSMasterNameNode/internal/business/constant"
 	"github.com/TSF/TFSMasterNameNode/internal/business/domain"
 	"github.com/TSF/TFSMasterNameNode/internal/infrastructure/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 )
 
 var (
@@ -58,12 +60,12 @@ func (f *fetchProvider) FetchHeartBeat(context *context.Context, socket *domain.
 		return nil, nil
 	}
 	defer conn.Close()
-	client := config.NewHeartBeatClient(conn)
+	client := config.NewFetchClient(conn)
 	body := &config.Socket{
 		Ip:   socket.Ip,
 		Port: socket.Port,
 	}
-	message, err := client.HeartBeat(*context, body)
+	message, err := client.FetchHeartBeat(*context, body)
 	if err != nil {
 		return nil, fmt.Errorf(constant.CouldntUpdateReplica)
 	}
@@ -76,7 +78,7 @@ func (f *fetchProvider) FetchLocation(context *context.Context, location *domain
 		return nil, nil
 	}
 	defer conn.Close()
-	client := config.NewLocateChunkClient(conn)
+	client := config.NewFetchClient(conn)
 	body := &config.ChunkLocation{
 		Name:      location.Name,
 		ChunkId:   int32(location.ID),
@@ -87,7 +89,7 @@ func (f *fetchProvider) FetchLocation(context *context.Context, location *domain
 			ReplicaId: int32(location.Socket.ReplicaId),
 		},
 	}
-	message, err := client.LocateChunk(*context, body)
+	message, err := client.FetchLocateChunk(*context, body)
 	if err != nil {
 		return nil, fmt.Errorf(constant.CouldntUpdateReplica)
 	}
@@ -137,6 +139,19 @@ func checkPeerConnection(ip string, port string) *grpc.ClientConn {
 		log.Printf("error conecting to:%s", address)
 		return nil
 	}
-	return conn
 
+	timeout := 15 * time.Second
+	deadline := time.Now().Add(timeout)
+	for {
+		state := conn.GetState()
+		if state == connectivity.Ready {
+			return conn
+		}
+
+		if time.Now().After(deadline) {
+			return nil
+		}
+
+		time.Sleep(time.Second)
+	}
 }

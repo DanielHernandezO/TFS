@@ -198,6 +198,8 @@ type FetchClient interface {
 	FetchLocations(ctx context.Context, in *VoidRequest, opts ...grpc.CallOption) (*Metadata, error)
 	FetchMetadata(ctx context.Context, in *FileMetadataFetch, opts ...grpc.CallOption) (*Response, error)
 	DeleteMetadataFetch(ctx context.Context, in *DeleteMetadata, opts ...grpc.CallOption) (*Response, error)
+	FetchLocateChunk(ctx context.Context, in *ChunkLocation, opts ...grpc.CallOption) (*Response, error)
+	FetchHeartBeat(ctx context.Context, in *Socket, opts ...grpc.CallOption) (*Response, error)
 }
 
 type fetchClient struct {
@@ -244,6 +246,24 @@ func (c *fetchClient) DeleteMetadataFetch(ctx context.Context, in *DeleteMetadat
 	return out, nil
 }
 
+func (c *fetchClient) FetchLocateChunk(ctx context.Context, in *ChunkLocation, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Fetch/FetchLocateChunk", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetchClient) FetchHeartBeat(ctx context.Context, in *Socket, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Fetch/FetchHeartBeat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FetchServer is the server API for Fetch service.
 // All implementations must embed UnimplementedFetchServer
 // for forward compatibility
@@ -252,6 +272,8 @@ type FetchServer interface {
 	FetchLocations(context.Context, *VoidRequest) (*Metadata, error)
 	FetchMetadata(context.Context, *FileMetadataFetch) (*Response, error)
 	DeleteMetadataFetch(context.Context, *DeleteMetadata) (*Response, error)
+	FetchLocateChunk(context.Context, *ChunkLocation) (*Response, error)
+	FetchHeartBeat(context.Context, *Socket) (*Response, error)
 	mustEmbedUnimplementedFetchServer()
 }
 
@@ -270,6 +292,12 @@ func (UnimplementedFetchServer) FetchMetadata(context.Context, *FileMetadataFetc
 }
 func (UnimplementedFetchServer) DeleteMetadataFetch(context.Context, *DeleteMetadata) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMetadataFetch not implemented")
+}
+func (UnimplementedFetchServer) FetchLocateChunk(context.Context, *ChunkLocation) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchLocateChunk not implemented")
+}
+func (UnimplementedFetchServer) FetchHeartBeat(context.Context, *Socket) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchHeartBeat not implemented")
 }
 func (UnimplementedFetchServer) mustEmbedUnimplementedFetchServer() {}
 
@@ -356,6 +384,42 @@ func _Fetch_DeleteMetadataFetch_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Fetch_FetchLocateChunk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChunkLocation)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetchServer).FetchLocateChunk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Fetch/FetchLocateChunk",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetchServer).FetchLocateChunk(ctx, req.(*ChunkLocation))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetch_FetchHeartBeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Socket)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetchServer).FetchHeartBeat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Fetch/FetchHeartBeat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetchServer).FetchHeartBeat(ctx, req.(*Socket))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Fetch_ServiceDesc is the grpc.ServiceDesc for Fetch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -378,6 +442,14 @@ var Fetch_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMetadataFetch",
 			Handler:    _Fetch_DeleteMetadataFetch_Handler,
+		},
+		{
+			MethodName: "FetchLocateChunk",
+			Handler:    _Fetch_FetchLocateChunk_Handler,
+		},
+		{
+			MethodName: "FetchHeartBeat",
+			Handler:    _Fetch_FetchHeartBeat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

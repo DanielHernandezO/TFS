@@ -54,4 +54,44 @@ func (f *fetchHandler) DeleteMetadataFetch(context context.Context, metadata *co
 		Code:    http.StatusOK,
 		Message: constant.SavedMetadata,
 	}, nil
+<<<<<<< HEAD
+=======
+}
+
+func (f *fetchHandler) FetchLocateChunk(context context.Context, chunkLocation *config.ChunkLocation) (*config.Response, error) {
+	err := f.fetchUsecase.FetchLocateChunk(&context, &domain.ChunkLocation{
+		Name:      chunkLocation.Name,
+		ID:        int(chunkLocation.ChunkId),
+		ReplicaId: int(chunkLocation.ReplicaId),
+		Socket: domain.Socket{
+			Ip:        chunkLocation.Socket.Ip,
+			Port:      chunkLocation.Socket.Port,
+			ReplicaId: int(chunkLocation.Socket.ReplicaId),
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return &config.Response{
+		Code:    http.StatusOK,
+		Message: constant.SavedMetadata,
+	}, nil
+}
+
+func (f *fetchHandler) FetchHeartBeat(context context.Context, socket *config.Socket) (*config.Response, error) {
+	err := f.fetchUsecase.FetchHeartBeat(&context, &domain.Socket{
+		Ip:        socket.Ip,
+		Port:      socket.Port,
+		ReplicaId: int(socket.ReplicaId),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return &config.Response{
+		Code:    http.StatusOK,
+		Message: constant.SavedMetadata,
+	}, nil
+>>>>>>> refs/remotes/origin/master
 }

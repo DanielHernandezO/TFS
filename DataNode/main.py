@@ -16,7 +16,7 @@ def initialize():
 
     print(MASTER_NAMENODE_URI,SLAVE_NAMENODE_URI,DATANODE_URI)
 
-    namenode_client = NameNodeClient(MASTER_NAMENODE_URI,DATANODE_URI)
+    namenode_client = NameNodeClient(MASTER_NAMENODE_URI,DATANODE_URI,SLAVE_NAMENODE_URI)
 
     init_response = namenode_client.send_heartbeat()
 
@@ -34,13 +34,14 @@ def initialize():
     ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50 MB
 ])
 
-    datanode_pb2_grpc.add_DataNodeServiceServicer_to_server(DataNodeServicer(MASTER_NAMENODE_URI,DATANODE_URI),server)
+    datanode_pb2_grpc.add_DataNodeServiceServicer_to_server(DataNodeServicer(MASTER_NAMENODE_URI,DATANODE_URI,SLAVE_NAMENODE_URI),server)
 
-    server.add_insecure_port(DATANODE_URI)
+    datanode_port = DATANODE_URI.split(":")[1]
+    port = server.add_insecure_port(f"0.0.0.0:{datanode_port}")
 
     server.start()
 
-    print(f"DataNode grpc started server at  {DATANODE_URI}")
+    print(f"DataNode grpc started server at  0.0.0.0:{port}")
 
     server.wait_for_termination()
 

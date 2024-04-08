@@ -196,6 +196,8 @@ var HeartBeat_ServiceDesc = grpc.ServiceDesc{
 type FetchClient interface {
 	FetchSocket(ctx context.Context, in *VoidRequest, opts ...grpc.CallOption) (*Sockets, error)
 	FetchLocations(ctx context.Context, in *VoidRequest, opts ...grpc.CallOption) (*Metadata, error)
+	FetchMetadata(ctx context.Context, in *FileMetadataFetch, opts ...grpc.CallOption) (*Response, error)
+	DeleteMetadataFetch(ctx context.Context, in *DeleteMetadata, opts ...grpc.CallOption) (*Response, error)
 }
 
 type fetchClient struct {
@@ -224,12 +226,32 @@ func (c *fetchClient) FetchLocations(ctx context.Context, in *VoidRequest, opts 
 	return out, nil
 }
 
+func (c *fetchClient) FetchMetadata(ctx context.Context, in *FileMetadataFetch, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Fetch/FetchMetadata", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fetchClient) DeleteMetadataFetch(ctx context.Context, in *DeleteMetadata, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Fetch/DeleteMetadataFetch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FetchServer is the server API for Fetch service.
 // All implementations must embed UnimplementedFetchServer
 // for forward compatibility
 type FetchServer interface {
 	FetchSocket(context.Context, *VoidRequest) (*Sockets, error)
 	FetchLocations(context.Context, *VoidRequest) (*Metadata, error)
+	FetchMetadata(context.Context, *FileMetadataFetch) (*Response, error)
+	DeleteMetadataFetch(context.Context, *DeleteMetadata) (*Response, error)
 	mustEmbedUnimplementedFetchServer()
 }
 
@@ -242,6 +264,12 @@ func (UnimplementedFetchServer) FetchSocket(context.Context, *VoidRequest) (*Soc
 }
 func (UnimplementedFetchServer) FetchLocations(context.Context, *VoidRequest) (*Metadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchLocations not implemented")
+}
+func (UnimplementedFetchServer) FetchMetadata(context.Context, *FileMetadataFetch) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchMetadata not implemented")
+}
+func (UnimplementedFetchServer) DeleteMetadataFetch(context.Context, *DeleteMetadata) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMetadataFetch not implemented")
 }
 func (UnimplementedFetchServer) mustEmbedUnimplementedFetchServer() {}
 
@@ -292,6 +320,42 @@ func _Fetch_FetchLocations_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Fetch_FetchMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FileMetadataFetch)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetchServer).FetchMetadata(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Fetch/FetchMetadata",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetchServer).FetchMetadata(ctx, req.(*FileMetadataFetch))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Fetch_DeleteMetadataFetch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FetchServer).DeleteMetadataFetch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Fetch/DeleteMetadataFetch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FetchServer).DeleteMetadataFetch(ctx, req.(*DeleteMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Fetch_ServiceDesc is the grpc.ServiceDesc for Fetch service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -306,6 +370,14 @@ var Fetch_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FetchLocations",
 			Handler:    _Fetch_FetchLocations_Handler,
+		},
+		{
+			MethodName: "FetchMetadata",
+			Handler:    _Fetch_FetchMetadata_Handler,
+		},
+		{
+			MethodName: "DeleteMetadataFetch",
+			Handler:    _Fetch_DeleteMetadataFetch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

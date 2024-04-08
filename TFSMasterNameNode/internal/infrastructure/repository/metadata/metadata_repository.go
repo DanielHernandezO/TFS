@@ -9,13 +9,13 @@ import (
 )
 
 type metadataRepository struct {
-	metadata map[string]map[int]map[string]string
+	metadata map[string]map[int]map[string]domain.Socket
 	mu       sync.Mutex
 }
 
 func NewMetadataRepository() *metadataRepository {
 	return &metadataRepository{
-		metadata: map[string]map[int]map[string]string{},
+		metadata: map[string]map[int]map[string]domain.Socket{},
 	}
 }
 
@@ -28,10 +28,10 @@ func (m *metadataRepository) Add(md *domain.Metadata) error {
 		return fmt.Errorf(constant.FileWasFound)
 	}
 
-	m.metadata[md.Name] = map[int]map[string]string{}
+	m.metadata[md.Name] = map[int]map[string]domain.Socket{}
 
 	for i := 0; i < md.ChunksQuantity; i++ {
-		m.metadata[md.Name][i] = map[string]string{}
+		m.metadata[md.Name][i] = map[string]domain.Socket{}
 	}
 	return nil
 }
@@ -48,8 +48,8 @@ func (m *metadataRepository) LocateChunk(location *domain.ChunkLocation) error {
 	if !exist {
 		return fmt.Errorf(constant.ChunkNotFound)
 	}
-
-	m.metadata[location.Name][location.ID][location.Socket.Ip] = location.Socket.Port
+	location.Socket.ReplicaId = location.ReplicaId
+	m.metadata[location.Name][location.ID][location.Socket.Ip] = location.Socket
 
 	return nil
 }
@@ -114,12 +114,13 @@ func (m *metadataRepository) buildChunks(fileName string) []domain.Chunk {
 	return chunks
 }
 
-func (m *metadataRepository) buildSocktes(machines map[string]string) []domain.Socket {
+func (m *metadataRepository) buildSocktes(machines map[string]domain.Socket) []domain.Socket {
 	sockets := []domain.Socket{}
 	for key, value := range machines {
 		socket := domain.Socket{
-			Ip:   key,
-			Port: value,
+			Ip:        key,
+			Port:      value.Port,
+			ReplicaId: value.ReplicaId,
 		}
 		sockets = append(sockets, socket)
 	}
